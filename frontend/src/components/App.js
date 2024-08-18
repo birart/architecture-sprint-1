@@ -3,25 +3,24 @@ import { Route, useHistory, Switch } from "react-router-dom";
 import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
-import PopupWithForm from "./PopupWithForm";
-import ImagePopup from "./ImagePopup";
 import api from "../utils/api";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
-import AddPlacePopup from "./AddPlacePopup";
-import Register from "./Register";
-import Login from "./Login";
-import InfoTooltip from "./InfoTooltip";
-import ProtectedRoute from "./ProtectedRoute";
-import * as auth from "../utils/auth.js";
+import AddPlacePopup from "feed/AddPlacePopup";
+import ImagePopup from "feed/ImagePopup";
+import feed_api from "feed/api"
+import Login from "auth/Login";
+import Register from "auth/Register";
+import InfoTooltip from "auth/InfoTooltip";
+import auth from "auth/api";
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] =
-    React.useState(false);
+      React.useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] =
-    React.useState(false);
+      React.useState(false);
   const [selectedCard, setSelectedCard] = React.useState(null);
   const [cards, setCards] = React.useState([]);
 
@@ -53,16 +52,16 @@ function App() {
     const token = localStorage.getItem("jwt");
     if (token) {
       auth
-        .checkToken(token)
-        .then((res) => {
-          setEmail(res.data.email);
-          setIsLoggedIn(true);
-          history.push("/");
-        })
-        .catch((err) => {
-          localStorage.removeItem("jwt");
-          console.log(err);
-        });
+          .checkToken(token)
+          .then((res) => {
+            setEmail(res.data.email);
+            setIsLoggedIn(true);
+            history.push("/");
+          })
+          .catch((err) => {
+            localStorage.removeItem("jwt");
+            console.log(err);
+          });
     }
   }, [history]);
 
@@ -112,7 +111,7 @@ function App() {
 
   function handleCardLike(card) {
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
-    api
+    feed_api
       .changeLikeCardStatus(card._id, !isLiked)
       .then((newCard) => {
         setCards((cards) =>
@@ -123,7 +122,7 @@ function App() {
   }
 
   function handleCardDelete(card) {
-    api
+    feed_api
       .removeCard(card._id)
       .then(() => {
         setCards((cards) => cards.filter((c) => c._id !== card._id));
@@ -132,7 +131,7 @@ function App() {
   }
 
   function handleAddPlaceSubmit(newCard) {
-    api
+    feed_api
       .addCard(newCard)
       .then((newCardFull) => {
         setCards([newCardFull, ...cards]);
@@ -143,30 +142,30 @@ function App() {
 
   function onRegister({ email, password }) {
     auth
-      .register(email, password)
-      .then((res) => {
-        setTooltipStatus("success");
-        setIsInfoToolTipOpen(true);
-        history.push("/signin");
-      })
-      .catch((err) => {
-        setTooltipStatus("fail");
-        setIsInfoToolTipOpen(true);
-      });
+        .register(email, password)
+        .then((res) => {
+          setTooltipStatus("success");
+          setIsInfoToolTipOpen(true);
+          history.push("/signin");
+        })
+        .catch((err) => {
+          setTooltipStatus("fail");
+          setIsInfoToolTipOpen(true);
+        });
   }
 
   function onLogin({ email, password }) {
     auth
-      .login(email, password)
-      .then((res) => {
-        setIsLoggedIn(true);
-        setEmail(email);
-        history.push("/");
-      })
-      .catch((err) => {
-        setTooltipStatus("fail");
-        setIsInfoToolTipOpen(true);
-      });
+        .login(email, password)
+        .then((res) => {
+          setIsLoggedIn(true);
+          setEmail(email);
+          history.push("/");
+        })
+        .catch((err) => {
+          setTooltipStatus("fail");
+          setIsInfoToolTipOpen(true);
+        });
   }
 
   function onSignOut() {
